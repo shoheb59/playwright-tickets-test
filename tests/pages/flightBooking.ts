@@ -1,15 +1,11 @@
-export class FlightBookingPage {
-    private page;
+import { BasePage } from "./basePage";
 
-
-    constructor(page) {
-        this.page = page;
-        
-      
-    }
+export class FlightBookingPage extends BasePage {
+    
+    private readonly url = 'https://www.shohoz.com/air-tickets';
 
     async navigate() {
-        await this.page.goto('/');
+        await this.page.goto(this.url);
     }
     async selectLeavingFrom() {
 

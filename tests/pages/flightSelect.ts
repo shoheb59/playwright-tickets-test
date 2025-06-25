@@ -1,10 +1,9 @@
 import { expect } from "@playwright/test";
+import { parsePrice } from "../../helpers/utils";
+import { BasePage } from "./basePage";
 
-export class FlightSelectPage {
-  private page;
-  constructor(page) {
-    this.page = page;
-  }
+export class FlightSelectPage extends BasePage {
+ 
 
   async selectUSBanglaFlight() {
     const checkbox = this.page.locator('[type="checkbox"]').nth(1);
@@ -24,9 +23,13 @@ export class FlightSelectPage {
   }
 
   async verifyFareAmount(priceText: string) {
-    const selectedPrice = parseFloat(priceText.replace(/[^\d.]/g, ""));
+    const selectedPrice = parsePrice(priceText);
     const totalText = await this.page.locator(".total_a").textContent();
-    const totalPrice = parseFloat(totalText.replace(/[^\d.]/g, ""));
+    if (totalText === null) {
+      throw new Error("Total price text not found");
+    }
+    const totalPrice = parsePrice(totalText);
+
 
     console.log(`Selected Price: ${selectedPrice}`);
     console.log(`Total Price: ${totalPrice}`);
@@ -45,7 +48,6 @@ export class FlightSelectPage {
   }
 
   async closeSignInModal() {
-    //await this.page.locator('.Flight_header_can__BkiIC').nth(1).click();
     await this.page.getByRole('button', { name: 'Close' }).nth(1).click();
   }
 
@@ -53,10 +55,10 @@ export class FlightSelectPage {
     const priceElements = this.page.locator(".Flight_line_spacing__INn4m");
     const prices = await priceElements.allTextContents();
     console.log(`US bangla all Prices: ${prices}`);
-    return prices.map(price => parseFloat(price.replace(/[,৳\s]/g, "")));
+    return prices.map(parsePrice);
   }
 
-    async selectNovoAirFlight() {
+async selectNovoAirFlight() {
     const checkbox = this.page.locator('[type="checkbox"]').nth(1)
     await checkbox.waitFor({ state: 'visible' });
     await checkbox.uncheck();
@@ -72,9 +74,8 @@ async novoAirFlightPrices() {
   const priceElements = this.page.locator(".Flight_line_spacing__INn4m");
   const prices = await priceElements.allTextContents();
   console.log(`Novo Air All Prices: ${prices}`);
-  return prices.map(price =>
-    parseFloat(price.replace(/[,৳\s]/g, ""))
-  );
+  return prices.map(parsePrice);
+
 }
 
 async compareUSBanglaAndNovoAirPrices(usBanglaPrices: number[], novoAirPrices: number[]) {

@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { FlightBookingPage } from './pages/flightBooking';
 import { FlightSelectPage } from './pages/flightSelect';
 
 test('Flight booking test', async ({ page }) => {
 const flightBookingPage = new FlightBookingPage(page);
 const flightSelectPage = new FlightSelectPage(page);
-await page.goto('https://www.shohoz.com/air-tickets');
+
+  await flightBookingPage.navigate();
   
   await flightBookingPage.selectLeavingFrom();
   await flightBookingPage.selectArrivalTo();
@@ -14,11 +16,12 @@ await page.goto('https://www.shohoz.com/air-tickets');
   await flightBookingPage.searchFlights();
 
 
-  
-  await flightSelectPage.selectUSBanglaFlight();
   const priceText = await flightSelectPage.selectUSBanglaFlight();
   await flightSelectPage.selectBookingFlight();
   await flightSelectPage.verifyReviewFareModalAppear();
+  if (priceText === null) {
+    throw new Error('Price text is null');
+  }
   await flightSelectPage.verifyFareAmount(priceText);
   await flightSelectPage.continueToBooking();
   await flightSelectPage.closeSignInModal();
